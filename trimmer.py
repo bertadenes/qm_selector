@@ -67,65 +67,6 @@ class Trimmer:
         self.structure_files.append(structure)
         return
 
-    def get_coulomb_core(self, selection, cutoff=0.2, write=False, heavy=False):
-        """
-        Experimental
-        :param selection:
-        :type selection:
-        :param cutoff:
-        :type cutoff:
-        :param write:
-        :type write:
-        :param heavy:
-        :type heavy:
-        :return:
-        :rtype:
-        """
-        layers = 2
-        self.centre = selection
-        atoms = selection.split(';')
-        ressel = ""
-        for atom in atoms:
-            identifier = atom.split('-')
-            segid, resnum = identifier[0].split(':')
-            if ressel != "":
-                ressel += " or "
-            if len(identifier) == 2:
-                ressel += f"(segid {segid} and resnum {resnum} and name {identifier[1]})"
-            elif len(identifier) == 1:
-                ressel += f"(segid {segid} and resnum {resnum})"
-        self.ressel = ressel
-        # here should be the if heavy part
-        if heavy:
-            raise NotImplementedError()
-        else:
-            sel = self.structure.select_atoms(ressel)
-            for i in range(layers):
-                qq = self.structure.atoms.charges[None, :] * sel.charges[:, None]
-                dm = np.linalg.norm(self.structure.atoms.positions[None, :, :] - sel.positions[:, None, :], axis=2)
-                cim = qq / dm
-                # cim = self.structure.atoms.charges[None, :] / dm
-                cim[np.where(cim == np.inf)] = 0
-                cim[np.isnan(cim)] = 0
-                self.fragment_structure()
-                frag_cim = np.empty((cim.shape[0], len(self.fragment2atom)), dtype=np.float_)
-                for j in range(len(self.fragment2atom)):
-                    frag_cim[:, j] = np.mean(cim[:, self.fragment2atom[j]], axis=1)
-                fragsel = np.where(np.abs(frag_cim) > cutoff)[1]
-                # sum_cim = np.sum(frag_cim, axis=0)
-                # fragsel = np.where(np.abs(sum_cim) > cutoff)[0]
-                atomsel = np.array([], dtype=int)
-                for f in fragsel:
-                    atomsel = np.append(atomsel, self.fragment2atom[f])
-                sel = self.structure.atoms[atomsel]
-            self.core_indices = np.unique(sel.indices)
-        # augment for multi=structure
-        for s in self.multi_structure:
-            raise NotImplementedError()
-        if write:
-            self.structure.atoms[self.core_indices].write(write)
-        return
-
     def get_core(self, selection, base_radius, write=False, heavy=False):
         """
         Defines the core selection around the user defined list.
@@ -467,43 +408,6 @@ class Trimmer:
             f.write("open write unit 10 card name ./qm_region.pdb\n")
             f.write("write coor pdb unit 10 card sele qm .or. type qq* end\n")
             f.write("\n")
-        return
-
-    def fragment_structure(self):
-        """
-        Experimental
-        :return:
-        :rtype:
-        """
-        atom2fragment = -np.ones(self.structure.atoms.n_atoms, dtype=int)
-        n_frags = 0
-        for i in range(self.structure.atoms.n_atoms):
-            if atom2fragment[i] != -1:
-                continue
-            atom2fragment[i] = n_frags
-            extended = True
-            selection = [i]
-            while extended:
-                extended = False
-                new_selection = selection
-                for i in selection:
-                    for j in self.structure.atoms[i].bonded_atoms.indices:
-                        if j not in selection:
-                            resp1 = self.check_interface(self.structure.atoms[j], self.structure.atoms[i])
-                            resp2 = self.check_interface(self.structure.atoms[i], self.structure.atoms[j])
-                            if resp1["include"] == j and resp2["include"] == i:
-                                extended = True
-                                new_selection = np.append(new_selection, j)
-                                continue
-                selection = np.unique(new_selection)
-            for j in selection:
-                atom2fragment[j] = n_frags
-            n_frags += 1
-        fragment2atom = []
-        for i in range(n_frags):
-            fragment2atom.append(np.where(atom2fragment == i)[0])
-        self.atom2fragment = atom2fragment
-        self.fragment2atom = fragment2atom
         return
 
     @staticmethod
