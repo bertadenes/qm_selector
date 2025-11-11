@@ -1,9 +1,12 @@
 
-# Trimmer - Chemically Sensible Trimmed Structure Generator for QM/MM Calculations
+# QM selector - Chemically Sensible Trimmed Structure Generator for QM/MM Calculations
 
 ## Overview
 
-Trimmer is a Python tool leveraging MDAnalysis to create chemically sensible trimmed molecular structures centered around protein residues. It is designed to prepare Quantum Mechanics (QM) cluster or QM/MM calculations by intelligently selecting atom subsets and defining link atoms bridging QM and molecular mechanics (MM) regions.
+QM selector is a Python tool leveraging MDAnalysis to create chemically sensible
+trimmed molecular structures centered around a selection of interest. It is designed to
+prepare Quantum Mechanics (QM) cluster or QM/MM calculations by selecting
+atom subsets and defining link atoms bridging QM and molecular mechanics (MM) regions.
 
 ## Features
 
@@ -29,14 +32,15 @@ common cases, which can be extended for arbitrary ligands.
 Run the script from the command line:
 
 ```bash
-python trimmer.py topology_file structure_file selection_options [OPTIONS]
+python main.py topology_file structure_file selection_options [OPTIONS]
 ```
 
 Arguments:
 
 - `topology_file`: Path to the molecular topology file (e.g., PSF).
 - `structure_file`: Path to the coordinate structure file (e.g., PDB).
-- `selection_options`: Residue or atom selection around which to center the trimmed structure. Formatted as `SEGID:RESID` or `SEGID:RESID-ATOM`. Multiple selections can be separated by semicolons.
+- `selection_options`: Residue or atom selection around which to center the trimmed structure. 
+Formatted as `SEGID:RESID` or `SEGID:RESID-ATOM`. Multiple selections can be separated by semicolons.
 
 Optional arguments:
 
@@ -52,10 +56,11 @@ Optional arguments:
 Example:
 
 ```bash
-python trimmer.py system.psf system.pdb PROA:43 -r 6.0 -v --noh -o trimmed_selection
+python main.py system.psf system.pdb PROA:43 -r 6.0 -v --noh -o qm_selection
 ```
 
-This runs Trimmer centered on residue 43 in segment PROA, with a 6 Å radius, verbose output, ignoring hydrogens, and writes output files with suffix "trimmed_selection".
+This runs centered on residue 43 in segment PROA, with a 6 Å radius, verbose output,
+ignoring hydrogens, and writes output files with suffix "qm_selection".
 
 ## Output
 
