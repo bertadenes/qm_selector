@@ -18,7 +18,7 @@ atom subsets and defining link atoms bridging QM and molecular mechanics (MM) re
 - Detects and defines link atoms for bonds broken between QM and MM regions.
 - Writes selections and link atom definitions in CHARMM-compatible input and PDB formats.
 
-## Extension algorithm
+## Extension algorithm: an example
 After defining the Na$^+$ ion as centre, the cyan sphere indicates the core atoms
 within an initial radius selected. From those, each iteration, following the
 connectivity, it is checked if an unlisted atom should be added, to the QM list,
